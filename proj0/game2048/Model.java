@@ -144,47 +144,50 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
         board.setViewingPerspective(side);
+        changed = helper();
         int size = board.size();
         for (int col = 0; col < size; col++) {
             for (int row = 3; row > 0; row--) {
-                if (board.tile(col, row) == null) {
+                if (board.tile(col, row) != null) {
+                    int gainScore = board.tile(col, row).value();
+                    Tile t = board.tile(col, row - 1);
+                    if (t!=null && board.move(col, row, t)) {
+                        changed = true;
+                        score += gainScore * 2;
+                        helper();
+                    }
+                }else{
+                    break;
+                }
+            }
+        }
+        board.setViewingPerspective(Side.NORTH);
+
+        checkGameOver();
+        if (changed) {
+            setChanged();
+        }
+        return changed;
+    }
+
+    public Boolean helper() {
+        Boolean changed = false;
+        int size = board.size();
+        for (int col = 0; col < size; col++){
+            for (int row = 3; row > 0; row--){
+                if(board.tile(col, row) == null){
                     int r;
-                    for (r = (row - 1); r >= 0; r--) {
+                    for (r = row - 1; r>=0; r--){
                         Tile t = board.tile(col, r);
-                        if (t != null) {
-                            changed = true;
+                        if (t != null){
                             board.move(col, row, t);
+                            changed = true;
                             break;
                         }
                     }
                     if (r == 0) break;
                 }
             }
-        }
-        for (int col = 0; col < size; col++) {
-            for (int row = 3; row > 0; row--) {
-                Tile t = board.tile(col, (row - 1));
-                if (board.tile(col, row) != null) {
-                    if (t != null) {
-                        if (t.value() == board.tile(col, row).value()) {
-                            int gainScore = t.value() * 2;
-                            if (board.move(col, row, t)) {
-                                score += gainScore;
-                            }
-                        }
-                    }
-                } else {
-                    if (t != null) {
-                        board.move(col, row, t);
-                    }
-                }
-            }
-        }
-
-        board.setViewingPerspective(Side.NORTH);
-        checkGameOver();
-        if (changed) {
-            setChanged();
         }
         return changed;
     }
@@ -267,7 +270,7 @@ public class Model extends Observable {
 
 
     @Override
-    /** Returns the model as a string, used for debugging. */
+/** Returns the model as a string, used for debugging. */
     public String toString() {
         Formatter out = new Formatter();
         out.format("%n[%n");
@@ -287,7 +290,7 @@ public class Model extends Observable {
     }
 
     @Override
-    /** Returns whether two models are equal. */
+/** Returns whether two models are equal. */
     public boolean equals(Object o) {
         if (o == null) {
             return false;
@@ -299,7 +302,7 @@ public class Model extends Observable {
     }
 
     @Override
-    /** Returns hash code of Model’s string. */
+/** Returns hash code of Model’s string. */
     public int hashCode() {
         return toString().hashCode();
     }
