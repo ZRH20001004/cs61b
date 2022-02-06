@@ -152,8 +152,8 @@ public class Model extends Observable {
                     for (r = (row - 1); r >= 0; r--) {
                         Tile t = board.tile(col, r);
                         if (t != null) {
-                            board.move(col, row, t);
                             changed = true;
+                            board.move(col, row, t);
                             break;
                         }
                     }
@@ -165,26 +165,27 @@ public class Model extends Observable {
                 Tile t = board.tile(col, (row - 1));
                 if (board.tile(col, row) != null) {
                     if (t != null) {
-                        int gainScore = t.value() * 2;
-                        if (board.move(col, row, t)) {
-                            changed = true;
-                            score += gainScore;
-                            for (int rr = row - 2; rr >= 0; rr--) {
-                                Tile tt = board.tile(col, rr);
-                                if (tt == null) {
-                                    break;
-                                } else {
-                                    board.move(col, rr + 1, tt);
+                        if (t.value() == board.tile(col, row).value()) {
+                            int gainScore = t.value() * 2;
+                            if (board.move(col, row, t)) {
+                                changed = true;
+                                score += gainScore;
+                                for (int rr = row - 2; rr >= 0; rr--) {
+                                    Tile tt = board.tile(col, rr);
+                                    if (tt == null) {
+                                        break;
+                                    } else {
+                                        board.move(col, rr + 1, tt);
+                                    }
                                 }
                             }
                         }
                     }
-                    }else{
+                } else {
                     break;
                 }
-                }
             }
-
+        }
 
 
         board.setViewingPerspective(Side.NORTH);
