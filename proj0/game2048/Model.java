@@ -167,12 +167,11 @@ public class Model extends Observable {
                     Tile t = board.tile(col, (row - 1));
                     if (board.tile(col, row) != null) {
                         if (t != null) {
-                            if (t.value() == board.tile(col, row).value()) {
-                                int gainScore = t.value() * 2;
-                                if (board.move(col, row, t)) {
-                                    score += gainScore;
-                                }
+                            int gainScore = t.value() * 2;
+                            if (board.move(col, row, t)) {
+                                score += gainScore;
                             }
+
                         }
                     } else {
                         if (t != null) {
