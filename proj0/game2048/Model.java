@@ -145,44 +145,42 @@ public class Model extends Observable {
         // changed local variable to true.
         board.setViewingPerspective(side);
         int size = board.size();
-        if (atLeastOneMoveExists(board)) {
-            changed = true;
-            for (int col = 0; col < size; col++) {
-                for (int row = 3; row > 0; row--) {
-                    if (board.tile(col, row) == null) {
-                        int r;
-                        for (r = (row - 1); r >= 0; r--) {
-                            Tile t = board.tile(col, r);
-                            if (t != null) {
-                                board.move(col, row, t);
-                                break;
-                            }
-                        }
-                        if (r == 0) break;
-                    }
-                }
-            }
-            for (int col = 0; col < size; col++) {
-                for (int row = 3; row > 0; row--) {
-                    Tile t = board.tile(col, (row - 1));
-                    if (board.tile(col, row) != null) {
+        for (int col = 0; col < size; col++) {
+            for (int row = 3; row > 0; row--) {
+                if (board.tile(col, row) == null) {
+                    int r;
+                    for (r = (row - 1); r >= 0; r--) {
+                        Tile t = board.tile(col, r);
                         if (t != null) {
-                            if (t.value() == board.tile(col, row).value()) {
-                                int gainScore = t.value() * 2;
-                                if (board.move(col, row, t)) {
-                                    score += gainScore;
-                                }
-                            }
-                        }
-                    } else {
-                        if (t != null) {
+                            changed = true;
                             board.move(col, row, t);
+                            break;
                         }
+                    }
+                    if (r == 0) break;
+                }
+            }
+        }
+        for (int col = 0; col < size; col++) {
+            for (int row = 3; row > 0; row--) {
+                Tile t = board.tile(col, (row - 1));
+                if (board.tile(col, row) != null) {
+                    if (t != null) {
+                        if (t.value() == board.tile(col, row).value()) {
+                            int gainScore = t.value() * 2;
+                            if (board.move(col, row, t)) {
+                                score += gainScore;
+                            }
+                        }
+                    }
+                } else {
+                    if (t != null) {
+                        board.move(col, row, t);
                     }
                 }
             }
-
         }
+
         board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
