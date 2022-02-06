@@ -31,14 +31,16 @@ public class TimeSLList {
             Ns.addLast(i);
             opCounts.addLast(10000);
         }
+        SLList<Integer> test = new SLList<>();
+        int start = 0;
         for (int i = 0; i < Ns.size(); i++) {
-            SLList<Integer> test = new SLList<>();
             int n = Ns.get(i);
-            for (int j = 0; j < n; j++) {
+            for (int j = start; j < n; j++) {
                 test.addLast(1);
             }
+            start = start + n;
             Stopwatch sw = new Stopwatch();
-            for (int k = 0; k < 10000; k++) {
+            for (int k = 0; k < 10000; k++){
                 test.getLast();
             }
             double timeInSeconds = sw.elapsedTime();
