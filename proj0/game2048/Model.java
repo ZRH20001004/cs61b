@@ -167,6 +167,7 @@ public class Model extends Observable {
                     if (t != null) {
                         int gainScore = t.value() * 2;
                         if (board.move(col, row, t)) {
+                            changed = true;
                             score += gainScore;
                             for (int rr = row - 2; rr >= 0; rr--) {
                                 Tile tt = board.tile(col, rr);
