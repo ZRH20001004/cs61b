@@ -51,11 +51,11 @@ public class ArrayDeque<T> implements Iterable<T> {
     public void resize(int capacity) {
         T[] copy = (T[]) new Object[capacity];
         if (first < last) {
-            System.arraycopy(items, first, copy, 0, size());
+            System.arraycopy(items, (first + 1), copy, 0, size());
         } else if (first > last) {
-            int copySize = items.length - first;
+            int copySize = items.length - first - 1;
             int start = copySize;
-            System.arraycopy(items, first, copy, 0, copySize);
+            System.arraycopy(items, (first + 1), copy, 0, copySize);
             System.arraycopy(items, 0, copy, start, last);
         }
         items = copy;
