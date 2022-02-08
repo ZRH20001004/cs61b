@@ -1,7 +1,9 @@
 package deque;
 
 
-public class ArrayDeque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] items;
     private int size;
     private int first;
@@ -14,11 +16,12 @@ public class ArrayDeque<T> {
         last = 4;
     }
 
-
+    @Override
     public int size() {
         return size;
     }
 
+    @Override
     public boolean isEmpty() {
         return size() == 0;
     }
@@ -48,6 +51,7 @@ public class ArrayDeque<T> {
 
     }
 
+    @Override
     public void addFirst(T item) {
         if (first == last) {
             resize(size() * 2);
@@ -61,6 +65,7 @@ public class ArrayDeque<T> {
         size++;
     }
 
+    @Override
     public T removeFirst() {
         if (isEmpty()) {
             return null;
@@ -82,6 +87,7 @@ public class ArrayDeque<T> {
         return removed;
     }
 
+    @Override
     public void addLast(T item) {
         if (first == last) {
             resize(size() * 2);
@@ -95,6 +101,7 @@ public class ArrayDeque<T> {
         size++;
     }
 
+    @Override
     public T removeLast() {
         if (isEmpty()) {
             return null;
@@ -116,6 +123,7 @@ public class ArrayDeque<T> {
         return removed;
     }
 
+    @Override
     public T get(int index) {
         if (index >= size()) {
             return null;
@@ -137,6 +145,7 @@ public class ArrayDeque<T> {
         return items[current];
     }
 
+    @Override
     public void printDeque() {
         for (int i = (first + 1); i < last; i++) {
             System.out.print(items[i] + " ");
@@ -162,4 +171,24 @@ public class ArrayDeque<T> {
         return true;
     }
 
+    @Override
+    public Iterator<T> iterator() {
+        return null;
+    }
+
+    private class ArrayIterator implements Iterator<T> {
+        int i = 0;
+
+        @Override
+        public boolean hasNext() {
+            return size() == i;
+        }
+
+        @Override
+        public T next() {
+            T item = get(i);
+            i++;
+            return item;
+        }
+    }
 }
