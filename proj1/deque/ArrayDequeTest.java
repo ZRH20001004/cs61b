@@ -141,11 +141,11 @@ public class ArrayDequeTest {
 
     @Test
     public void ADequalsTest() {
-        LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
-        ArrayDeque<Integer> ad1 = new ArrayDeque<Integer>();
+        LinkedListDeque<String> lld1 = new LinkedListDeque<>();
+        ArrayDeque<String> ad1 = new ArrayDeque<>();
         for (int i = 0; i < 10; i++) {
-            lld1.addLast(i);
-            ad1.addLast(i);
+            lld1.addLast("a");
+            ad1.addLast("a");
         }
         boolean result = ad1.equals(lld1);
         assertTrue(result);
