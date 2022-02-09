@@ -32,7 +32,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         private Node prev;
         private Node next;
 
-         Node(T item, Node prev, Node next) {
+        Node(T item, Node prev, Node next) {
             this.item = item;
             this.prev = prev;
             this.next = next;
@@ -157,14 +157,15 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (o == this) {
             return true;
         }
-        if (!(o instanceof Deque)) {
+        if (!(o instanceof Deque<?>)) {
             return false;
         }
-        if (((Deque<?>) o).size() != this.size()) {
+        Deque<?> ld = (Deque<?>) o;
+        if (ld.size() != size()) {
             return false;
         }
         for (int i = 0; i < size(); i++) {
-            if (this.get(i) != ((Deque<?>) o).get(i)) {
+            if (ld.get(i) != get(i)) {
                 return false;
             }
         }
