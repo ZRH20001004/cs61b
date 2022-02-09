@@ -147,7 +147,7 @@ public class ArrayDequeTest {
             lld1.addLast(i);
             ad1.addLast(i);
         }
-        boolean result = ad1.equals(ad1);
+        boolean result = ad1.equals(lld1);
         assertTrue(result);
     }
 

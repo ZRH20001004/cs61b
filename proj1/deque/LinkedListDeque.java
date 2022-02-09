@@ -32,7 +32,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         private Node prev;
         private Node next;
 
-        Node(T item, Node prev, Node next) {
+         Node(T item, Node prev, Node next) {
             this.item = item;
             this.prev = prev;
             this.next = next;
