@@ -162,7 +162,7 @@ public class ArrayDequeTest {
                 correct.addFirst(i);
                 broken.addFirst(i);
             } else if (operationNumber == 1) {
-              assertEquals(correct.removeFirst(),broken.removeFirst());
+                assertEquals(correct.removeFirst(), broken.removeFirst());
             } else {
                 boolean expect = correct.isEmpty();
                 boolean actual = broken.isEmpty();
