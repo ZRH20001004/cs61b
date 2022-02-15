@@ -1,7 +1,6 @@
 package bstmap;
 
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     private BSTNode root;
@@ -111,7 +110,18 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public Set<K> keySet() {
-        throw new UnsupportedOperationException();
+        Set<K> set = new HashSet<>();
+        keySet(root, set);
+        return set;
+    }
+
+    private void keySet(BSTNode x, Set<K> set) {
+        if (x == null) {
+            return;
+        }
+        keySet(x.left, set);
+        set.add(x.key);
+        keySet(x.right, set);
     }
 
     @Override
@@ -126,6 +136,39 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public Iterator<K> iterator() {
-        throw new UnsupportedOperationException();
+        return new BSTMapIterator<>();
+    }
+
+    private class BSTMapIterator<K> implements Iterator<K> {
+        Deque<K> deque;
+
+        public BSTMapIterator() {
+            deque = new ArrayDeque<>();
+            keys(root, deque);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !deque.isEmpty();
+        }
+
+        @Override
+        public K next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            K key = deque.removeFirst();
+            return key;
+        }
+
+        private void keys(BSTNode x, Deque<K> deque) {
+            if (x == null) {
+                return;
+            }
+            keys(x.left, deque);
+            deque.addFirst((K) x.key);
+            keys(x.right, deque);
+
+        }
     }
 }
