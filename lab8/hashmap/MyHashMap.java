@@ -205,12 +205,27 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        if (!containsKey(key)){
+            return null;
+        }
+        int index = getIndex(key, buckets.length);
+        Node removed = getNode(buckets[index],key);
+        buckets[index].remove(removed);
+        return removed.value;
     }
 
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        if (!containsKey(key)){
+            return null;
+        }
+        int index = getIndex(key, buckets.length);
+        Node removed = getNode(buckets[index],key);
+        if(removed.value.equals(value)){
+            return removed.value;
+        }else{
+            return null;
+        }
     }
 
     @Override
