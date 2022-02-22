@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,6 +12,11 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Formatter;
+import java.util.List;
 
 
 /** Assorted utilities.
@@ -44,10 +50,8 @@ class Utils {
     /** Write the result of concatenating the bytes in CONTENTS to FILE,
      *  creating or overwriting it as needed.  Each object in CONTENTS may be
      *  either a String or a byte array.  Throws IllegalArgumentException
-     *  in case of problems.
-     * @param file
-     * @param contents*/
-    static void writeContents(String file, String contents) {
+     *  in case of problems. */
+    static void writeContents(File file, Object... contents) {
         try {
             if (file.isDirectory()) {
                 throw
