@@ -2,7 +2,6 @@ package gitlet;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -64,7 +63,7 @@ public class Repository {
     public void add(String file) {
         File toAddFile = join(CWD, file);
         if (toAddFile.exists()) {
-            byte[] blob = readContents(toAddFile);
+            String blob = readContentsAsString(toAddFile);
             String blobID = sha1(blob);
             writeContents(join(BLOBS, blobID), blob);
             Commit currentCommit = getCurrentCommit();
@@ -203,7 +202,7 @@ public class Repository {
         List<String> files = plainFilenamesIn(CWD);
         for (String trackFile : tree.keySet()) {
             if (files.contains(trackFile)) {
-                byte[] blob = readContents(join(CWD, trackFile));
+                String blob = readContentsAsString(join(CWD, trackFile));
                 String blobID = sha1(blob);
                 if (!tree.get(trackFile).equals(blobID) && !addition.containsKey(trackFile)) {
                     modiFiles.add(trackFile + "(modified)");
@@ -216,7 +215,7 @@ public class Repository {
         }
         for (String addFile : addition.keySet()) {
             if (files.contains(addFile)) {
-                byte[] blob = readContents(join(CWD, addFile));
+                String blob = readContentsAsString(join(CWD, addFile));
                 String blobID = sha1();
                 if (!addition.get(addFile).equals(blobID)) {
                     modiFiles.add(addFile + "(modified)");
@@ -269,6 +268,36 @@ public class Repository {
             message("No commit with that id exists.");
             System.exit(0);
         }
+    }
+
+    public void checkout3(String branch) {
+        if (branch == HEAD) {
+            message("No need to checkout the current branch.");
+            System.exit(0);
+        }
+        File branchFile = join(Branch, branch);
+        if (branchFile.exists()) {
+            Set<String> trackFiles = getCurrentCommit().getTree().keySet();
+            Set<String> files = readObject(branchFile,Commit.class).getTree().keySet();
+            String branchID = readObject(branchFile,Commit.class).getID();
+            for (String file : files){
+                if (trackFiles.contains(file)){
+                    checkout2(branchID,file);
+                }else{
+                    message("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.exit(0);
+                }
+            }
+            for (String trackFile : trackFiles){
+                if (!files.contains(trackFile)){
+                    join(CWD,trackFile).delete();
+                }
+            }
+        } else {
+            message("No such branch exists.");
+            System.exit(0);
+        }
+
     }
 
 

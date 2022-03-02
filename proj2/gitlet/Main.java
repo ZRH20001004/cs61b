@@ -11,7 +11,6 @@ public class Main {
      * <COMMAND> <OPERAND1> <OPERAND2> ...
      */
     public static void main(String[] args) {
-        // TODO: what if args is empty?
         if (args.length == 0) {
             System.out.println("Please enter a command.");
             System.exit(0);
@@ -20,14 +19,11 @@ public class Main {
         String firstArg = args[0];
         switch (firstArg) {
             case "init":
-                // TODO: handle the `init` command
                 repo.init();
                 break;
             case "add":
-                // TODO: handle the `add [filename]` command
                 repo.add(args[1]);
                 break;
-            // TODO: FILL THE REST IN
             case "commit":
                 if (args[1] == "" || args[1].isEmpty()) {
                     System.out.println("Please enter a commit message.");
@@ -51,6 +47,14 @@ public class Main {
             case "status":
                 repo.status();
                 break;
+            case "checkout":
+                if (args[1].equals("--")){
+                    repo.checkout1(args[2]);
+                }else if (args[2].equals("--")){
+                    repo.checkout2(args[1],args[3]);
+                }else{
+                    repo.checkout3(args[1]);
+                }
             default:
                 System.out.println(" No command with that name exists.");
                 System.exit(0);
