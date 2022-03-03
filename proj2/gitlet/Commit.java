@@ -38,6 +38,7 @@ public class Commit implements Serializable {
         date = ft.format(begin);
         message = "initial commit";
         ID = calID();
+        tree = new HashMap<>();
     }
 
     public Commit(String msg, HashMap<String, String> tree, String parentID) {
