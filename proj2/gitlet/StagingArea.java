@@ -7,27 +7,28 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class StagingArea implements Serializable {
-    private final TreeMap<String,String> addition;
+    private final TreeMap<String, String> addition;
     private final Set<String> removal;
-    public StagingArea(){
+
+    public StagingArea() {
         addition = new TreeMap<>();
         removal = new TreeSet<>();
     }
 
-    public void clear(){
+    public void clear() {
         addition.clear();
         removal.clear();
     }
 
-    public TreeMap<String,String> getAddition(){
+    public TreeMap<String, String> getAddition() {
         return addition;
     }
 
-    public Set<String> getRemoval(){
+    public Set<String> getRemoval() {
         return removal;
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return addition.isEmpty() && removal.isEmpty();
     }
 }

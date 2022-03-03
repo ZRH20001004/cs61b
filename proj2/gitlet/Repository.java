@@ -65,17 +65,16 @@ public class Repository {
         if (toAddFile.exists()) {
             String blob = readContentsAsString(toAddFile);
             String blobID = sha1(blob);
-            writeContents(join(BLOBS, blobID), blob);
             Commit currentCommit = getCurrentCommit();
             if (currentCommit.getTree().containsKey(file) && currentCommit.getTree().get(file).equals(blobID)) {
                 if (stage.getAddition().containsKey(file)) {
                     stage.getAddition().remove(file);
                 }
-                return;
+            }else{
+                stage.getAddition().put(file,blobID);
+                writeContents(join(BLOBS,blobID),blob);
             }
-            if (!stage.getAddition().containsKey(file) || !stage.getAddition().get(file).equals(blobID)) {
-                stage.getAddition().put(file, blobID);
-            }
+
         } else {
             message("File does not exist");
             System.exit(0);
@@ -293,6 +292,8 @@ public class Repository {
                     join(CWD,trackFile).delete();
                 }
             }
+            HEAD = branch;
+            stage.clear();
         } else {
             message("No such branch exists.");
             System.exit(0);
