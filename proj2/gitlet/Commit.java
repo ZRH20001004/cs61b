@@ -4,9 +4,11 @@ package gitlet;
 
 
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.Locale;
 
 import static gitlet.Utils.*;
 
@@ -33,18 +35,18 @@ public class Commit implements Serializable {
     private HashMap<String, String> tree;
 
     public Commit() {
-        Date begin = new Date(0);
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        date = ft.format(begin);
+        Date now = new Date(0);
+        DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
+        date = dateFormat.format(now);
         message = "initial commit";
         ID = calID();
         tree = new HashMap<>();
     }
 
     public Commit(String msg, HashMap<String, String> tree, String parentID) {
-        Date current = new Date();
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        date = ft.format(current);
+        Date now = new Date();
+        DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
+        date = dateFormat.format(now);
         message = msg;
         this.tree = tree;
         this.parentID = parentID;

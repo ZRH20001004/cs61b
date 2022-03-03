@@ -2,16 +2,17 @@ package gitlet;
 
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class StagingArea implements Serializable {
-    private final TreeMap<String, String> addition;
-    private final Set<String> removal;
+    private Map<String, String> addition;
+    private Set<String> removal;
 
     public StagingArea() {
-        addition = new TreeMap<>();
+        addition = new TreeMap<String, String>();
         removal = new TreeSet<>();
     }
 
@@ -20,7 +21,7 @@ public class StagingArea implements Serializable {
         removal.clear();
     }
 
-    public TreeMap<String, String> getAddition() {
+    public Map<String, String> getAddition() {
         return addition;
     }
 
@@ -31,4 +32,5 @@ public class StagingArea implements Serializable {
     public boolean isEmpty() {
         return addition.isEmpty() && removal.isEmpty();
     }
+
 }
