@@ -54,9 +54,9 @@ public class Repository {
             COMMITS.mkdir();
             Commit initialCommit = new Commit();
             File currentBranch = join(Branch, HEAD);
-            writeObject(currentBranch, serialize(initialCommit));
+            writeObject(currentBranch, initialCommit);
             File commitFile = join(COMMITS, initialCommit.getID());
-            writeObject(commitFile, serialize(initialCommit));
+            writeObject(commitFile, initialCommit);
         }
     }
 
@@ -120,9 +120,9 @@ public class Repository {
             }
             Commit newCommit = new Commit(msg, newTree, parentID);
             File commitFile = join(COMMITS, newCommit.getID());
-            writeObject(commitFile, serialize(newCommit));
+            writeObject(commitFile, newCommit);
             File currentBranch = join(Branch, HEAD);
-            writeObject(currentBranch, serialize(newCommit));
+            writeObject(currentBranch, newCommit);
             stage.clear();
         } else {
             message("No changes added to the commit.");
