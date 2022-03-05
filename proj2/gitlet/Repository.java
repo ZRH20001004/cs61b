@@ -181,7 +181,7 @@ public class Repository {
         for (String file : files) {
             Commit commit = readObject(join(COMMITS, file), Commit.class);
             if (commit.getMessage().equals(msg)) {
-                System.out.println(commit.getMessage());
+                System.out.println(commit.getID());
                 count++;
             }
         }
@@ -287,7 +287,7 @@ public class Repository {
     }
 
     public void checkout3(String branch) {
-        if (branch == getHEAD()) {
+        if (branch.equals(getHEAD())) {
             message("No need to checkout the current branch.");
             System.exit(0);
         }
@@ -295,14 +295,17 @@ public class Repository {
         if (branchFile.exists()) {
             Set<String> trackFiles = getCurrentCommit().getTree().keySet();
             Set<String> files = readObject(branchFile, Commit.class).getTree().keySet();
+            List<String> workingDir = plainFilenamesIn(CWD);
             String branchID = readObject(branchFile, Commit.class).getID();
             for (String file : files) {
                 if (trackFiles.contains(file)) {
                     checkout2(branchID, file);
                 } else {
-                    message("There is an untracked file in the way; "
-                            + "delete it, or add and commit it first.");
-                    System.exit(0);
+                    if (workingDir.contains(file)) {
+                        message("There is an untracked file in the way; "
+                                + "delete it, or add and commit it first.");
+                        System.exit(0);
+                    }
                 }
             }
             for (String trackFile : trackFiles) {
@@ -350,13 +353,16 @@ public class Repository {
         if (commit.exists()) {
             HashMap<String, String> trackedFiles = getCurrentCommit().getTree();
             HashMap<String, String> files = readObject(commit, Commit.class).getTree();
+            List<String> workingDir = plainFilenamesIn(CWD);
             for (String file : files.keySet()) {
                 if (trackedFiles.containsKey(file)) {
                     checkout2(id, file);
                 } else {
-                    message("`There is an untracked file in the way;" +
-                            " delete it, or add and commit it first.`");
-                    System.exit(0);
+                    if (workingDir.contains(file)) {
+                        message("`There is an untracked file in the way;"
+                                + " delete it, or add and commit it first.`");
+                        System.exit(0);
+                    }
                 }
             }
             File currBranch = join(BRANCH, getHEAD());
