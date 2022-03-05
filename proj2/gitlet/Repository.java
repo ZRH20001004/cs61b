@@ -75,8 +75,7 @@ public class Repository {
             String blobID = sha1(blob);
             Commit currentCommit = getCurrentCommit();
             StagingArea stage = getStage();
-            if (currentCommit.getTree().containsKey(file)
-                    && currentCommit.getTree().get(file).equals(blobID)) {
+            if (currentCommit.getTree().containsKey(file) && currentCommit.getTree().get(file).equals(blobID)) {
                 if (stage.getAddition().containsKey(file)) {
                     stage.getAddition().remove(file);
                 }
@@ -298,14 +297,12 @@ public class Repository {
             List<String> workingDir = plainFilenamesIn(CWD);
             String branchID = readObject(branchFile, Commit.class).getID();
             for (String file : files) {
-                if (trackFiles.contains(file)) {
-                    checkout2(branchID, file);
+                if (!trackFiles.contains(file) && workingDir.contains(file)) {
+                    message("There is an untracked file in the way; "
+                            + "delete it, or add and commit it first.");
+                    System.exit(0);
                 } else {
-                    if (workingDir.contains(file)) {
-                        message("There is an untracked file in the way; "
-                                + "delete it, or add and commit it first.");
-                        System.exit(0);
-                    }
+                    checkout2(branchID, file);
                 }
             }
             for (String trackFile : trackFiles) {
@@ -355,14 +352,12 @@ public class Repository {
             HashMap<String, String> files = readObject(commit, Commit.class).getTree();
             List<String> workingDir = plainFilenamesIn(CWD);
             for (String file : files.keySet()) {
-                if (trackedFiles.containsKey(file)) {
-                    checkout2(id, file);
+                if (!trackedFiles.containsKey(file) && workingDir.contains(file)) {
+                    message("There is an untracked file in the way; "
+                            + "delete it, or add and commit it first.");
+                    System.exit(0);
                 } else {
-                    if (workingDir.contains(file)) {
-                        message("`There is an untracked file in the way;"
-                                + " delete it, or add and commit it first.`");
-                        System.exit(0);
-                    }
+                    checkout2(id, file);
                 }
             }
             File currBranch = join(BRANCH, getHEAD());
@@ -373,6 +368,10 @@ public class Repository {
             message("No commit with that id exists.");
             System.exit(0);
         }
+    }
+
+    public void merge(String branch) {
+
     }
 
 
