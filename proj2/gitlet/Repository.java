@@ -7,18 +7,17 @@ import java.util.*;
 
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
 
 /**
  * Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
+ * <p>
+ * does at a high level.
  *
  * @author TODO
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
+     *
      * <p>
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
@@ -37,7 +36,6 @@ public class Repository {
     public static final File BLOBS = join(GITLET_DIR, "blobs");
     public static final File STAGES = join(GITLET_DIR, "stages");
     public static final File HEAD = join(GITLET_DIR, "head");
-    /* TODO: fill in the rest of this class. */
 
 
     public void init() {
@@ -98,10 +96,7 @@ public class Repository {
     public void rm(String file) {
         Commit currentCommit = getCurrentCommit();
         StagingArea stage = getStage();
-        if (!stage.isEmpty()) {
-            message("No reason to remove the file.");
-            System.exit(0);
-        } else {
+        if (stage.getAddition().containsKey(file) || currentCommit.getTree().containsKey(file)) {
             if (stage.getAddition().containsKey(file)) {
                 stage.getAddition().remove(file);
             }
@@ -113,6 +108,9 @@ public class Repository {
                 }
             }
             writeObject(STAGES, stage);
+        } else {
+            message("No reason to remove the file.");
+            System.exit(0);
         }
     }
 
@@ -139,8 +137,7 @@ public class Repository {
             writeObject(commitFile, newCommit);
             File currentBranch = join(Branch, getHEAD());
             writeObject(currentBranch, newCommit);
-            stage.clear();
-            writeObject(STAGES, stage);
+            clearStage();
         } else {
             message("No changes added to the commit.");
             System.exit(0);
@@ -179,15 +176,15 @@ public class Repository {
 
     public void find(String msg) {
         List<String> files = plainFilenamesIn(COMMITS);
-        int size = files.size();
+        int count = 0;
         for (String file : files) {
             Commit commit = readObject(join(COMMITS, file), Commit.class);
             if (commit.getMessage().equals(msg)) {
-                files.remove(file);
                 System.out.println(commit.getMessage());
+                count++;
             }
         }
-        if (files.size() == size) {
+        if (count > 0) {
             message("Found no commit with that message.");
             System.exit(0);
         }
@@ -216,7 +213,7 @@ public class Repository {
         Commit curr = getCurrentCommit();
         HashMap<String, String> tree = curr.getTree();
         TreeMap<String, String> addition = (TreeMap<String, String>) stage.getAddition();
-        Set<String> removal = stage.getRemoval();
+        TreeSet<String> removal = (TreeSet<String>) stage.getRemoval();
         List<String> files = plainFilenamesIn(CWD);
         for (String trackFile : tree.keySet()) {
             if (files.contains(trackFile)) {
@@ -234,7 +231,7 @@ public class Repository {
         for (String addFile : addition.keySet()) {
             if (files.contains(addFile)) {
                 String blob = readContentsAsString(join(CWD, addFile));
-                String blobID = sha1();
+                String blobID = sha1(blob);
                 if (!addition.get(addFile).equals(blobID)) {
                     modiFiles.add(addFile + "(modified)");
                 }
@@ -311,15 +308,62 @@ public class Repository {
                     join(CWD, trackFile).delete();
                 }
             }
-            writeContents(HEAD,branch);
-            StagingArea stage = getStage();
-            stage.clear();
-            writeObject(STAGES, stage);
+            writeContents(HEAD, branch);
+            clearStage();
         } else {
             message("No such branch exists.");
             System.exit(0);
         }
 
+    }
+
+    public void branch(String branch) {
+        List<String> branches = plainFilenamesIn(Branch);
+        if (branches.contains(branch)) {
+            message(" A branch with that name already exists.");
+            System.exit(0);
+        } else {
+            File newBranch = join(Branch, branch);
+            Commit curr = getCurrentCommit();
+            writeObject(newBranch, curr);
+        }
+    }
+
+    public void rmBranch(String branch) {
+        List<String> branches = plainFilenamesIn(Branch);
+        if (!branches.contains(branch)) {
+            message("A branch with that name does not exist.");
+            System.exit(0);
+        } else if (getHEAD().equals(branch)) {
+            message("Cannot remove the current branch.");
+            System.exit(0);
+        } else {
+            File toDeleteBranch = join(Branch, branch);
+            toDeleteBranch.delete();
+        }
+    }
+
+    public void reset(String ID) {
+        File commit = join(COMMITS, ID);
+        if (commit.exists()) {
+            HashMap<String, String> trackedFiles = getCurrentCommit().getTree();
+            HashMap<String, String> files = readObject(commit, Commit.class).getTree();
+            for (String file : files.keySet()) {
+                if (trackedFiles.containsKey(file)) {
+                    checkout2(ID, file);
+                } else {
+                    message("`There is an untracked file in the way; delete it, or add and commit it first.`");
+                    System.exit(0);
+                }
+            }
+            File currBranch = join(Branch, getHEAD());
+            Commit givenCommit = readObject(commit, Commit.class);
+            writeObject(currBranch, givenCommit);
+            clearStage();
+        } else {
+            message("No commit with that id exists.");
+            System.exit(0);
+        }
     }
 
 
@@ -329,6 +373,11 @@ public class Repository {
 
     private StagingArea getStage() {
         return readObject(STAGES, StagingArea.class);
+    }
+
+    private void clearStage() {
+        StagingArea stage = new StagingArea();
+        writeObject(STAGES, stage);
     }
 
     private String getHEAD() {
