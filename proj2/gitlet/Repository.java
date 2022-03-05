@@ -75,8 +75,8 @@ public class Repository {
             String blobID = sha1(blob);
             Commit currentCommit = getCurrentCommit();
             StagingArea stage = getStage();
-            if (currentCommit.getTree().containsKey(file) &&
-                    currentCommit.getTree().get(file).equals(blobID)) {
+            if (currentCommit.getTree().containsKey(file)
+                    && currentCommit.getTree().get(file).equals(blobID)) {
                 if (stage.getAddition().containsKey(file)) {
                     stage.getAddition().remove(file);
                 }
@@ -185,7 +185,7 @@ public class Repository {
                 count++;
             }
         }
-        if (count > 0) {
+        if (count == 0) {
             message("Found no commit with that message.");
             System.exit(0);
         }
@@ -300,8 +300,8 @@ public class Repository {
                 if (trackFiles.contains(file)) {
                     checkout2(branchID, file);
                 } else {
-                    message("There is an untracked file in the way; " +
-                            "delete it, or add and commit it first.");
+                    message("There is an untracked file in the way; "
+                            + "delete it, or add and commit it first.");
                     System.exit(0);
                 }
             }

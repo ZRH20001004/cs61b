@@ -48,12 +48,15 @@ public class Main {
                 repo.status();
                 break;
             case "checkout":
-                if (args[1].equals("--") && args.length == 3) {
+                if (args.length == 3 && args[1].equals("--")) {
                     repo.checkout1(args[2]);
-                } else if (args[2].equals("--") && args.length == 4) {
+                } else if (args.length == 4 && args[2].equals("--")) {
                     repo.checkout2(args[1], args[3]);
                 } else if (args.length == 2) {
                     repo.checkout3(args[1]);
+                } else {
+                    System.out.println("Incorrect operands.");
+                    System.exit(0);
                 }
                 break;
             case "branch":
