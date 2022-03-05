@@ -3,7 +3,7 @@ package gitlet;
 /**
  * Driver class for Gitlet, a subset of the Git version-control system.
  *
- * @author TODO
+ * @author Spike
  */
 public class Main {
     /**
@@ -48,11 +48,11 @@ public class Main {
                 repo.status();
                 break;
             case "checkout":
-                if (args[1].equals("--") && args.length == 2) {
+                if (args[1].equals("--") && args.length == 3) {
                     repo.checkout1(args[2]);
-                } else if (args[2].equals("--") && args.length == 3) {
+                } else if (args[2].equals("--") && args.length == 4) {
                     repo.checkout2(args[1], args[3]);
-                } else if (args.length == 1) {
+                } else if (args.length == 2) {
                     repo.checkout3(args[1]);
                 }
                 break;

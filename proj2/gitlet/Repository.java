@@ -13,7 +13,7 @@ import static gitlet.Utils.*;
  * <p>
  * does at a high level.
  *
- * @author TODO
+ * @author Spike
  */
 public class Repository {
     /**
@@ -31,7 +31,7 @@ public class Repository {
      * The .gitlet directory.
      */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-    public static final File Branch = join(GITLET_DIR, "branch");
+    public static final File BRANCH = join(GITLET_DIR, "branch");
     public static final File COMMITS = join(GITLET_DIR, "commits");
     public static final File BLOBS = join(GITLET_DIR, "blobs");
     public static final File STAGES = join(GITLET_DIR, "stages");
@@ -44,7 +44,7 @@ public class Repository {
             System.exit(0);
         } else {
             GITLET_DIR.mkdir();
-            Branch.mkdir();
+            BRANCH.mkdir();
             BLOBS.mkdir();
             COMMITS.mkdir();
             try {
@@ -61,7 +61,7 @@ public class Repository {
             writeObject(STAGES, stage);
             writeContents(HEAD, "master");
             Commit initialCommit = new Commit();
-            File currentBranch = join(Branch, getHEAD());
+            File currentBranch = join(BRANCH, getHEAD());
             writeObject(currentBranch, initialCommit);
             File commitFile = join(COMMITS, initialCommit.getID());
             writeObject(commitFile, initialCommit);
@@ -75,7 +75,8 @@ public class Repository {
             String blobID = sha1(blob);
             Commit currentCommit = getCurrentCommit();
             StagingArea stage = getStage();
-            if (currentCommit.getTree().containsKey(file) && currentCommit.getTree().get(file).equals(blobID)) {
+            if (currentCommit.getTree().containsKey(file) &&
+                    currentCommit.getTree().get(file).equals(blobID)) {
                 if (stage.getAddition().containsKey(file)) {
                     stage.getAddition().remove(file);
                 }
@@ -135,7 +136,7 @@ public class Repository {
             Commit newCommit = new Commit(msg, newTree, parentID);
             File commitFile = join(COMMITS, newCommit.getID());
             writeObject(commitFile, newCommit);
-            File currentBranch = join(Branch, getHEAD());
+            File currentBranch = join(BRANCH, getHEAD());
             writeObject(currentBranch, newCommit);
             clearStage();
         } else {
@@ -192,7 +193,7 @@ public class Repository {
 
     public void status() {
         StagingArea stage = getStage();
-        List<String> branches = plainFilenamesIn(Branch);
+        List<String> branches = plainFilenamesIn(BRANCH);
         Collections.sort(branches);
         System.out.println("=== Branches ===");
         for (String branch : branches) {
@@ -268,8 +269,8 @@ public class Repository {
         }
     }
 
-    public void checkout2(String ID, String file) {
-        File target = join(COMMITS, ID);
+    public void checkout2(String id, String file) {
+        File target = join(COMMITS, id);
         if (target.exists()) {
             HashMap<String, String> tree = readObject(target, Commit.class).getTree();
             if (tree.containsKey(file)) {
@@ -290,7 +291,7 @@ public class Repository {
             message("No need to checkout the current branch.");
             System.exit(0);
         }
-        File branchFile = join(Branch, branch);
+        File branchFile = join(BRANCH, branch);
         if (branchFile.exists()) {
             Set<String> trackFiles = getCurrentCommit().getTree().keySet();
             Set<String> files = readObject(branchFile, Commit.class).getTree().keySet();
@@ -299,7 +300,8 @@ public class Repository {
                 if (trackFiles.contains(file)) {
                     checkout2(branchID, file);
                 } else {
-                    message("There is an untracked file in the way; delete it, or add and commit it first.");
+                    message("There is an untracked file in the way; " +
+                            "delete it, or add and commit it first.");
                     System.exit(0);
                 }
             }
@@ -318,19 +320,19 @@ public class Repository {
     }
 
     public void branch(String branch) {
-        List<String> branches = plainFilenamesIn(Branch);
+        List<String> branches = plainFilenamesIn(BRANCH);
         if (branches.contains(branch)) {
             message(" A branch with that name already exists.");
             System.exit(0);
         } else {
-            File newBranch = join(Branch, branch);
+            File newBranch = join(BRANCH, branch);
             Commit curr = getCurrentCommit();
             writeObject(newBranch, curr);
         }
     }
 
     public void rmBranch(String branch) {
-        List<String> branches = plainFilenamesIn(Branch);
+        List<String> branches = plainFilenamesIn(BRANCH);
         if (!branches.contains(branch)) {
             message("A branch with that name does not exist.");
             System.exit(0);
@@ -338,25 +340,26 @@ public class Repository {
             message("Cannot remove the current branch.");
             System.exit(0);
         } else {
-            File toDeleteBranch = join(Branch, branch);
+            File toDeleteBranch = join(BRANCH, branch);
             toDeleteBranch.delete();
         }
     }
 
-    public void reset(String ID) {
-        File commit = join(COMMITS, ID);
+    public void reset(String id) {
+        File commit = join(COMMITS, id);
         if (commit.exists()) {
             HashMap<String, String> trackedFiles = getCurrentCommit().getTree();
             HashMap<String, String> files = readObject(commit, Commit.class).getTree();
             for (String file : files.keySet()) {
                 if (trackedFiles.containsKey(file)) {
-                    checkout2(ID, file);
+                    checkout2(id, file);
                 } else {
-                    message("`There is an untracked file in the way; delete it, or add and commit it first.`");
+                    message("`There is an untracked file in the way;" +
+                            " delete it, or add and commit it first.`");
                     System.exit(0);
                 }
             }
-            File currBranch = join(Branch, getHEAD());
+            File currBranch = join(BRANCH, getHEAD());
             Commit givenCommit = readObject(commit, Commit.class);
             writeObject(currBranch, givenCommit);
             clearStage();
@@ -368,7 +371,7 @@ public class Repository {
 
 
     private Commit getCurrentCommit() {
-        return readObject(join(Branch, getHEAD()), Commit.class);
+        return readObject(join(BRANCH, getHEAD()), Commit.class);
     }
 
     private StagingArea getStage() {
