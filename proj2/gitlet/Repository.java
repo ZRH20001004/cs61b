@@ -227,6 +227,9 @@ public class Repository {
                         && !removal.contains(file)) {
                     untrackFiles.add(file);
                 }
+                if (removal.contains(file)) {
+                    untrackFiles.add(file);
+                }
             }
             System.out.println("=== Untracked Files ===");
             for (String untrackFile : untrackFiles) {
@@ -404,7 +407,33 @@ public class Repository {
             message("Current branch fast-forwarded.");
             System.exit(0);
         }
-
+        HashMap<String, String> prevTree = splitPoint.getTree();
+        HashMap<String, String> currTree = curr.getTree();
+        HashMap<String, String> branchTree = branch.getTree();
+        for (String file : prevTree.keySet()) {
+            if (currTree.containsKey(file)
+                    && prevTree.containsKey(file)) {
+                if (currTree.get(file).equals(prevTree.get(file))
+                        && !branchTree.get(file).equals(file)) {
+                    checkout2(branch.getID(), file);
+                    stage.getAddition().put(file, branchTree.get(file));
+                }
+            }
+            if (currTree.containsKey(file)
+                    && !prevTree.containsKey(file)) {
+                if (currTree.get(file).equals(prevTree.get(file))) {
+                    join(CWD, file).delete();
+                    stage.getAddition().remove(file);
+                }
+            }
+        }
+        for (String file : branchTree.keySet()) {
+            if (!prevTree.containsKey(file)
+                    && !currTree.containsKey(file)) {
+                checkout2(branch.getID(), file);
+                stage.getAddition().put(file, branchTree.get(file));
+            }
+        }
 
     }
 
