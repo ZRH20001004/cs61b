@@ -40,7 +40,8 @@ public class Repository {
 
     public void init() {
         if (GITLET_DIR.exists()) {
-            message("A Gitlet version-control system already exists in the current directory.");
+            message("A Gitlet version-control system "
+                    + "already exists in the current directory.");
             System.exit(0);
         } else {
             GITLET_DIR.mkdir();
@@ -75,7 +76,8 @@ public class Repository {
             String blobID = sha1(blob);
             Commit currentCommit = getCurrentCommit();
             StagingArea stage = getStage();
-            if (currentCommit.getTree().containsKey(file) && currentCommit.getTree().get(file).equals(blobID)) {
+            if (currentCommit.getTree().containsKey(file)
+                    && currentCommit.getTree().get(file).equals(blobID)) {
                 if (stage.getAddition().containsKey(file)) {
                     stage.getAddition().remove(file);
                 }
@@ -96,7 +98,8 @@ public class Repository {
     public void rm(String file) {
         Commit currentCommit = getCurrentCommit();
         StagingArea stage = getStage();
-        if (stage.getAddition().containsKey(file) || currentCommit.getTree().containsKey(file)) {
+        if (stage.getAddition().containsKey(file)
+                || currentCommit.getTree().containsKey(file)) {
             if (stage.getAddition().containsKey(file)) {
                 stage.getAddition().remove(file);
             }
@@ -191,70 +194,46 @@ public class Repository {
     }
 
     public void status() {
-        StagingArea stage = getStage();
-        List<String> branches = plainFilenamesIn(BRANCH);
-        Collections.sort(branches);
-        System.out.println("=== Branches ===");
-        for (String branch : branches) {
-            System.out.println("*" + branch);
-        }
-        System.out.println();
-        System.out.println("=== Staged Files ===");
-        for (String stageFile : stage.getAddition().keySet()) {
-            System.out.println(stageFile);
-        }
-        System.out.println();
-        System.out.println("=== Removed Files ===");
-        for (String removeFile : stage.getRemoval()) {
-            System.out.println(removeFile);
-        }
-        System.out.println();
-        Set<String> modiFiles = new TreeSet<>();
-        Commit curr = getCurrentCommit();
-        HashMap<String, String> tree = curr.getTree();
-        TreeMap<String, String> addition = (TreeMap<String, String>) stage.getAddition();
-        TreeSet<String> removal = (TreeSet<String>) stage.getRemoval();
-        List<String> files = plainFilenamesIn(CWD);
-        for (String trackFile : tree.keySet()) {
-            if (files.contains(trackFile)) {
-                String blob = readContentsAsString(join(CWD, trackFile));
-                String blobID = sha1(blob);
-                if (!tree.get(trackFile).equals(blobID) && !addition.containsKey(trackFile)) {
-                    modiFiles.add(trackFile + "(modified)");
-                }
-            } else {
-                if (!removal.contains(trackFile)) {
-                    modiFiles.add(trackFile + "(deleted)");
+        if (GITLET_DIR.exists()) {
+            StagingArea stage = getStage();
+            List<String> branches = plainFilenamesIn(BRANCH);
+            Collections.sort(branches);
+            System.out.println("=== Branches ===");
+            for (String branch : branches) {
+                System.out.println("*" + branch);
+            }
+            System.out.println();
+            System.out.println("=== Staged Files ===");
+            for (String stageFile : stage.getAddition().keySet()) {
+                System.out.println(stageFile);
+            }
+            System.out.println();
+            System.out.println("=== Removed Files ===");
+            for (String removeFile : stage.getRemoval()) {
+                System.out.println(removeFile);
+            }
+            System.out.println();
+            Commit curr = getCurrentCommit();
+            HashMap<String, String> tree = curr.getTree();
+            TreeMap<String, String> addition = (TreeMap<String, String>) stage.getAddition();
+            List<String> files = plainFilenamesIn(CWD);
+            System.out.println("=== Modifications Not Staged For Commit ===");
+            System.out.println();
+            Set<String> untrackFiles = new TreeSet<>();
+            for (String file : files) {
+                if (!tree.containsKey(file) && !addition.containsKey(file)) {
+                    untrackFiles.add(file);
                 }
             }
-        }
-        for (String addFile : addition.keySet()) {
-            if (files.contains(addFile)) {
-                String blob = readContentsAsString(join(CWD, addFile));
-                String blobID = sha1(blob);
-                if (!addition.get(addFile).equals(blobID)) {
-                    modiFiles.add(addFile + "(modified)");
-                }
-            } else {
-                modiFiles.add(addFile + "(deleted)");
+            System.out.println("=== Untracked Files ===");
+            for (String untrackFile : untrackFiles) {
+                System.out.println(untrackFile);
             }
+            System.out.println();
+        } else {
+            message("Not in an initialized Gitlet directory.");
+            System.exit(0);
         }
-        System.out.println("=== Modifications Not Staged For Commit ===");
-        for (String modiFile : modiFiles) {
-            System.out.println(modiFile);
-        }
-        System.out.println();
-        Set<String> untrackFiles = new TreeSet<>();
-        for (String file : files) {
-            if (!tree.containsKey(file) && !addition.containsKey(file)) {
-                untrackFiles.add(file);
-            }
-        }
-        System.out.println("=== Untracked Files ===");
-        for (String untrackFile : untrackFiles) {
-            System.out.println(untrackFile);
-        }
-        System.out.println();
     }
 
     public void checkout1(String file) {
@@ -319,6 +298,16 @@ public class Repository {
 
     }
 
+    public void checkoutShort(String miniID,String file){
+        String maxID = "";
+        for (String id : plainFilenamesIn(COMMITS)){
+            if (id.contains(miniID)){
+                maxID = id;
+            }
+        }
+        checkout2(maxID,file);
+    }
+
     public void branch(String branch) {
         List<String> branches = plainFilenamesIn(BRANCH);
         if (branches.contains(branch)) {
@@ -369,11 +358,6 @@ public class Repository {
             System.exit(0);
         }
     }
-
-    public void merge(String branch) {
-
-    }
-
 
     private Commit getCurrentCommit() {
         return readObject(join(BRANCH, getHEAD()), Commit.class);

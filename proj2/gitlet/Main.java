@@ -25,7 +25,7 @@ public class Main {
                 repo.add(args[1]);
                 break;
             case "commit":
-                if (args[1] == "" || args[1].isEmpty()) {
+                if (args[1].equals("") || args[1].isEmpty()) {
                     System.out.println("Please enter a commit message.");
                     System.exit(0);
                 } else {
@@ -51,7 +51,11 @@ public class Main {
                 if (args.length == 3 && args[1].equals("--")) {
                     repo.checkout1(args[2]);
                 } else if (args.length == 4 && args[2].equals("--")) {
-                    repo.checkout2(args[1], args[3]);
+                    if (args[1].length() <= 8) {
+                        repo.checkoutShort(args[1], args[3]);
+                    } else {
+                        repo.checkout2(args[1], args[3]);
+                    }
                 } else if (args.length == 2) {
                     repo.checkout3(args[1]);
                 } else {
