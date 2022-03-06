@@ -72,6 +72,9 @@ public class Main {
             case "reset":
                 repo.reset(args[1]);
                 break;
+            case "merge":
+                repo.merge(args[1]);
+                break;
             default:
                 System.out.println(" No command with that name exists.");
                 System.exit(0);

@@ -222,10 +222,8 @@ public class Repository {
             System.out.println();
             Set<String> untrackFiles = new TreeSet<>();
             for (String file : files) {
-                if (!tree.containsKey(file) && !addition.containsKey(file)) {
-                    untrackFiles.add(file);
-                }
-                if (removal.contains(file)) {
+                if (!tree.containsKey(file) && !addition.containsKey(file)
+                        && !removal.contains(file)) {
                     untrackFiles.add(file);
                 }
             }
@@ -363,7 +361,7 @@ public class Repository {
         }
     }
 
-    public String getSplitpoint(String branch) {
+    public String getSplitPoint(String branch) {
         String id = getCurrentCommit().getID();
         while (id != null) {
             String branchID = getBranch(branch).getID();
@@ -376,6 +374,36 @@ public class Repository {
             id = getCommit(id).getParentID();
         }
         return null;
+    }
+
+    public void merge(String branchName) {
+        StagingArea stage = getStage();
+        Commit curr = getCurrentCommit();
+        Commit branch = getBranch(branchName);
+        String splitPoint = getSplitPoint(branchName);
+        if (!stage.isEmpty()) {
+            message("You have uncommitted changes.");
+            System.exit(0);
+        }
+        if (branch == null) {
+            message("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if (branchName.equals(getHEAD())) {
+            message("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+        if (splitPoint.equals(branch.getID())) {
+            message("Given branch is an ancestor of "
+                    + "the current branch.");
+            System.exit(0);
+        }
+        if (splitPoint.equals(curr.getID())) {
+            checkout3(branchName);
+            message("Current branch fast-forwarded.");
+            System.exit(0);
+        }
+
     }
 
     private Commit getCurrentCommit() {
@@ -400,7 +428,12 @@ public class Repository {
     }
 
     private Commit getBranch(String branch) {
-        return readObject(join(BRANCH, branch), Commit.class);
+        File branchFile = join(BRANCH, branch);
+        if (branchFile.exists()) {
+            return readObject(branchFile, Commit.class);
+        } else {
+            return null;
+        }
     }
 
 }
