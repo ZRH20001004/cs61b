@@ -222,7 +222,8 @@ public class Repository {
             System.out.println();
             Set<String> untrackFiles = new TreeSet<>();
             for (String file : files) {
-                if (!tree.containsKey(file) && !addition.containsKey(file)
+                if (!tree.containsKey(file)
+                        && !addition.containsKey(file)
                         && !removal.contains(file)) {
                     untrackFiles.add(file);
                 }
@@ -361,13 +362,13 @@ public class Repository {
         }
     }
 
-    public String getSplitPoint(String branch) {
+    public Commit getSplitPoint(String branch) {
         String id = getCurrentCommit().getID();
         while (id != null) {
             String branchID = getBranch(branch).getID();
             while (branchID != null) {
                 if (branchID.equals(id)) {
-                    return id;
+                    return getCommit(id);
                 }
                 branchID = getCommit(branchID).getParentID();
             }
@@ -380,7 +381,7 @@ public class Repository {
         StagingArea stage = getStage();
         Commit curr = getCurrentCommit();
         Commit branch = getBranch(branchName);
-        String splitPoint = getSplitPoint(branchName);
+        Commit splitPoint = getSplitPoint(branchName);
         if (!stage.isEmpty()) {
             message("You have uncommitted changes.");
             System.exit(0);
@@ -393,16 +394,17 @@ public class Repository {
             message("Cannot merge a branch with itself.");
             System.exit(0);
         }
-        if (splitPoint.equals(branch.getID())) {
+        if (splitPoint.getID().equals(branch.getID())) {
             message("Given branch is an ancestor of "
                     + "the current branch.");
             System.exit(0);
         }
-        if (splitPoint.equals(curr.getID())) {
+        if (splitPoint.getID().equals(curr.getID())) {
             checkout3(branchName);
             message("Current branch fast-forwarded.");
             System.exit(0);
         }
+
 
     }
 
