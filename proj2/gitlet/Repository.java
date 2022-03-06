@@ -216,7 +216,7 @@ public class Repository {
             Commit curr = getCurrentCommit();
             HashMap<String, String> tree = curr.getTree();
             TreeMap<String, String> addition = (TreeMap<String, String>) stage.getAddition();
-            TreeMap<String, String> removal = (TreeMap<String, String>) stage.getRemoval();
+            TreeSet<String> removal = (TreeSet<String>) stage.getRemoval();
             List<String> files = plainFilenamesIn(CWD);
             System.out.println("=== Modifications Not Staged For Commit ===");
             System.out.println();
@@ -225,7 +225,7 @@ public class Repository {
                 if (!tree.containsKey(file) && !addition.containsKey(file)) {
                     untrackFiles.add(file);
                 }
-                if (removal.containsKey(file)) {
+                if (removal.contains(file)) {
                     untrackFiles.add(file);
                 }
             }
@@ -363,8 +363,27 @@ public class Repository {
         }
     }
 
+    public String getSplitpoint(String branch) {
+        String id = getCurrentCommit().getID();
+        while (id != null) {
+            String branchID = getBranch(branch).getID();
+            while (branchID != null) {
+                if (branchID.equals(id)) {
+                    return id;
+                }
+                branchID = getCommit(branchID).getParentID();
+            }
+            id = getCommit(id).getParentID();
+        }
+        return null;
+    }
+
     private Commit getCurrentCommit() {
         return readObject(join(BRANCH, getHEAD()), Commit.class);
+    }
+
+    private Commit getCommit(String id) {
+        return readObject(join(COMMITS, id), Commit.class);
     }
 
     private StagingArea getStage() {
@@ -379,4 +398,9 @@ public class Repository {
     private String getHEAD() {
         return readContentsAsString(HEAD);
     }
+
+    private Commit getBranch(String branch) {
+        return readObject(join(BRANCH, branch), Commit.class);
+    }
+
 }
