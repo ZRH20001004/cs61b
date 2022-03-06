@@ -216,12 +216,16 @@ public class Repository {
             Commit curr = getCurrentCommit();
             HashMap<String, String> tree = curr.getTree();
             TreeMap<String, String> addition = (TreeMap<String, String>) stage.getAddition();
+            TreeMap<String, String> removal = (TreeMap<String, String>) stage.getRemoval();
             List<String> files = plainFilenamesIn(CWD);
             System.out.println("=== Modifications Not Staged For Commit ===");
             System.out.println();
             Set<String> untrackFiles = new TreeSet<>();
             for (String file : files) {
                 if (!tree.containsKey(file) && !addition.containsKey(file)) {
+                    untrackFiles.add(file);
+                }
+                if (removal.containsKey(file)) {
                     untrackFiles.add(file);
                 }
             }
@@ -298,14 +302,14 @@ public class Repository {
 
     }
 
-    public void checkoutShort(String miniID,String file){
+    public void checkoutShort(String miniID, String file) {
         String maxID = "";
-        for (String id : plainFilenamesIn(COMMITS)){
-            if (id.contains(miniID)){
+        for (String id : plainFilenamesIn(COMMITS)) {
+            if (id.contains(miniID)) {
                 maxID = id;
             }
         }
-        checkout2(maxID,file);
+        checkout2(maxID, file);
     }
 
     public void branch(String branch) {
