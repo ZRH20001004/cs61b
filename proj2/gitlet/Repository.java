@@ -200,26 +200,26 @@ public class Repository {
             Collections.sort(branches);
             System.out.println("=== Branches ===");
             for (String branch : branches) {
-                System.out.println("*" + branch);
+                if (branch.equals(getHEAD())) {
+                    System.out.println("*" + branch);
+                } else {
+                    System.out.println(branch);
+                }
             }
-            System.out.println();
-            System.out.println("=== Staged Files ===");
+            System.out.println("\n=== Staged Files ===");
             for (String stageFile : stage.getAddition().keySet()) {
                 System.out.println(stageFile);
             }
-            System.out.println();
-            System.out.println("=== Removed Files ===");
+            System.out.println("\n=== Removed Files ===");
             for (String removeFile : stage.getRemoval()) {
                 System.out.println(removeFile);
             }
-            System.out.println();
             Commit curr = getCurrentCommit();
             HashMap<String, String> tree = curr.getTree();
             TreeMap<String, String> addition = (TreeMap<String, String>) stage.getAddition();
             TreeSet<String> removal = (TreeSet<String>) stage.getRemoval();
             List<String> files = plainFilenamesIn(CWD);
-            System.out.println("=== Modifications Not Staged For Commit ===");
-            System.out.println();
+            System.out.println("\n=== Modifications Not Staged For Commit ===");
             Set<String> untrackFiles = new TreeSet<>();
             for (String file : files) {
                 if (!tree.containsKey(file)
@@ -230,7 +230,7 @@ public class Repository {
                     untrackFiles.add(file);
                 }
             }
-            System.out.println("=== Untracked Files ===");
+            System.out.println("\n=== Untracked Files ===");
             for (String untrackFile : untrackFiles) {
                 System.out.println(untrackFile);
             }
@@ -436,15 +436,15 @@ public class Repository {
                     && !currTree.containsKey(file)
                     && !branchTree.get(file).equals(prevTree.get(file))) {
                 conflict++;
-                if (join(CWD, file).exists()) {
-                    message("There is an untracked file in the way; "
-                            + "delete it, or add and commit it first.");
-                }
                 writeConflict(file, stage, currTree, branchTree);
             }
         }
         for (String file : branchTree.keySet()) {
             if (!prevTree.containsKey(file) && !currTree.containsKey(file)) {
+                if (join(CWD, file).exists()) {
+                    message("There is an untracked file in the way; "
+                            + "delete it, or add and commit it first.");
+                }
                 checkout2(branch.getID(), file);
                 stage.getAddition().put(file, branchTree.get(file));
             }
