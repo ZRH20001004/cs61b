@@ -98,16 +98,16 @@ public class Repository {
     public void rm(String file) {
         Commit currentCommit = getCurrentCommit();
         StagingArea stage = getStage();
-        if (currentCommit.getTree().containsKey(file)) {
+        if (stage.getAddition().containsKey(file)) {
+            stage.getAddition().remove(file);
+            writeObject(STAGES, stage);
+        } else if (currentCommit.getTree().containsKey(file)) {
             stage.getRemoval().add(file);
             stage.getAddition().remove(file);
             File toRemove = join(CWD, file);
             if (toRemove.exists()) {
                 toRemove.delete();
             }
-            writeObject(STAGES, stage);
-        } else if (stage.getAddition().containsKey(file)) {
-            stage.getAddition().remove(file);
             writeObject(STAGES, stage);
         } else {
             message("No reason to remove the file.");
