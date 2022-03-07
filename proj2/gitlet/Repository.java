@@ -223,8 +223,7 @@ public class Repository {
             Set<String> untrackFiles = new TreeSet<>();
             for (String file : files) {
                 if (!tree.containsKey(file)
-                        && !addition.containsKey(file)
-                        && !removal.contains(file)) {
+                        && !addition.containsKey(file)) {
                     untrackFiles.add(file);
                 }
                 if (removal.contains(file)) {
@@ -412,8 +411,7 @@ public class Repository {
         HashMap<String, String> currTree = curr.getTree();
         HashMap<String, String> branchTree = branch.getTree();
         for (String file : prevTree.keySet()) {
-            if (currTree.containsKey(file)
-                    && branchTree.containsKey(file)) {
+            if (currTree.containsKey(file) && branchTree.containsKey(file)) {
                 if (currTree.get(file).equals(prevTree.get(file))
                         && !branchTree.get(file).equals(prevTree.get(file))) {
                     checkout2(branch.getID(), file);
@@ -439,6 +437,10 @@ public class Repository {
                     && !currTree.containsKey(file)
                     && !branchTree.get(file).equals(prevTree.get(file))) {
                 conflict++;
+                if (join(CWD, file).exists()) {
+                    message("There is an untracked file in the way; "
+                            + "delete it, or add and commit it first.");
+                }
                 writeConflict(file, stage, currTree, branchTree);
             }
         }
@@ -447,8 +449,7 @@ public class Repository {
                 checkout2(branch.getID(), file);
                 stage.getAddition().put(file, branchTree.get(file));
             }
-            if (!prevTree.containsKey(file)
-                    && currTree.containsKey(file)
+            if (!prevTree.containsKey(file) && currTree.containsKey(file)
                     && !currTree.get(file).equals(branchTree.get(file))) {
                 conflict++;
                 writeConflict(file, stage, currTree, branchTree);
@@ -456,6 +457,10 @@ public class Repository {
         }
         writeObject(STAGES, stage);
         commit("Merged " + branchName + " into " + getHEAD() + ".");
+        soutConflict(conflict);
+    }
+
+    private void soutConflict(int conflict) {
         if (conflict > 0) {
             message("Encountered a merge conflict.");
         }
@@ -463,11 +468,14 @@ public class Repository {
 
     private String getConflict(String curr, String branch) {
         String msg = "<<<<<<< HEAD\n";
-        msg += curr;
+        if (curr != null) {
+            msg += curr;
+        }
         msg += "\n";
         msg += "=======\n";
-        msg += branch;
-        msg += "\n";
+        if (branch != null) {
+            msg += branch;
+        }
         msg += ">>>>>>>";
         return msg;
     }
@@ -475,11 +483,11 @@ public class Repository {
     private void writeConflict(String file, StagingArea stage,
                                HashMap<String, String> currTree,
                                HashMap<String, String> branchTree) {
-        String cur = "\n";
+        String cur = null;
         if (currTree.containsKey(file)) {
             cur = readContentsAsString(join(BLOBS, currTree.get(file)));
         }
-        String bran = "\n";
+        String bran = null;
         if (branchTree.containsKey(file)) {
             bran = readContentsAsString(join(BLOBS, branchTree.get(file)));
         }
