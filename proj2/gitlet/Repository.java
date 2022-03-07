@@ -455,7 +455,7 @@ public class Repository {
             }
         }
         writeObject(STAGES, stage);
-        commit("Merged " + branchName + " into " + getHEAD() + " .");
+        commit("Merged " + branchName + " into " + getHEAD() + ".");
         if (conflict > 0) {
             message("Encountered a merge conflict.");
         }
@@ -467,6 +467,7 @@ public class Repository {
         msg += "\n";
         msg += "=======\n";
         msg += branch;
+        msg += "\n";
         msg += ">>>>>>>";
         return msg;
     }
@@ -474,7 +475,10 @@ public class Repository {
     private void writeConflict(String file, StagingArea stage,
                                HashMap<String, String> currTree,
                                HashMap<String, String> branchTree) {
-        String cur = readContentsAsString(join(BLOBS, currTree.get(file)));
+        String cur = "\n";
+        if (currTree.containsKey(file)) {
+            cur = readContentsAsString(join(BLOBS, currTree.get(file)));
+        }
         String bran = readContentsAsString(join(BLOBS, branchTree.get(file)));
         writeContents(join(CWD, file), getConflict(cur, bran));
         stage.getAddition().put(file, getConflict(cur, bran));
