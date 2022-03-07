@@ -476,7 +476,7 @@ public class Repository {
         if (branch != null) {
             msg += branch;
         }
-        msg += ">>>>>>>";
+        msg += ">>>>>>>\n";
         return msg;
     }
 
