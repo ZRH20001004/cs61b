@@ -385,7 +385,6 @@ public class Repository {
         StagingArea stage = getStage();
         Commit curr = getCurrentCommit();
         Commit branch = getBranch(branchName);
-        Commit splitPoint = getSplitPoint(branchName);
         if (!stage.isEmpty()) {
             message("You have uncommitted changes.");
             System.exit(0);
@@ -398,6 +397,7 @@ public class Repository {
             message("Cannot merge a branch with itself.");
             System.exit(0);
         }
+        Commit splitPoint = getSplitPoint(branchName);
         if (splitPoint.getID().equals(branch.getID())) {
             message("Given branch is an ancestor of "
                     + "the current branch.");
@@ -479,7 +479,10 @@ public class Repository {
         if (currTree.containsKey(file)) {
             cur = readContentsAsString(join(BLOBS, currTree.get(file)));
         }
-        String bran = readContentsAsString(join(BLOBS, branchTree.get(file)));
+        String bran = "\n";
+        if (branchTree.containsKey(file)) {
+            bran = readContentsAsString(join(BLOBS, branchTree.get(file)));
+        }
         writeContents(join(CWD, file), getConflict(cur, bran));
         stage.getAddition().put(file, getConflict(cur, bran));
     }
