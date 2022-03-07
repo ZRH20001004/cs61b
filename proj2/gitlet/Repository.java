@@ -398,8 +398,7 @@ public class Repository {
         }
         Commit splitPoint = getSplitPoint(branchName);
         if (splitPoint.getID().equals(branch.getID())) {
-            message("Given branch is an ancestor of "
-                    + "the current branch.");
+            message("Given branch is an ancestor of the current branch.");
             System.exit(0);
         }
         if (splitPoint.getID().equals(curr.getID())) {
@@ -468,12 +467,11 @@ public class Repository {
 
     private String getConflict(String curr, String branch) {
         String msg = "<<<<<<< HEAD\n";
-        if (curr != null) {
+        if (curr.length() > 0) {
             msg += curr;
         }
-        msg += "\n";
         msg += "=======\n";
-        if (branch != null) {
+        if (branch.length() > 0) {
             msg += branch;
         }
         msg += ">>>>>>>\n";
@@ -483,11 +481,11 @@ public class Repository {
     private void writeConflict(String file, StagingArea stage,
                                HashMap<String, String> currTree,
                                HashMap<String, String> branchTree) {
-        String cur = null;
+        String cur = "";
         if (currTree.containsKey(file)) {
             cur = readContentsAsString(join(BLOBS, currTree.get(file)));
         }
-        String bran = null;
+        String bran = "";
         if (branchTree.containsKey(file)) {
             bran = readContentsAsString(join(BLOBS, branchTree.get(file)));
         }
