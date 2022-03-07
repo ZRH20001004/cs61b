@@ -381,6 +381,7 @@ public class Repository {
     }
 
     public void merge(String branchName) {
+        int conflict = 0;
         StagingArea stage = getStage();
         Commit curr = getCurrentCommit();
         Commit branch = getBranch(branchName);
@@ -412,29 +413,71 @@ public class Repository {
         HashMap<String, String> branchTree = branch.getTree();
         for (String file : prevTree.keySet()) {
             if (currTree.containsKey(file)
-                    && prevTree.containsKey(file)) {
+                    && branchTree.containsKey(file)) {
                 if (currTree.get(file).equals(prevTree.get(file))
-                        && !branchTree.get(file).equals(file)) {
+                        && !branchTree.get(file).equals(prevTree.get(file))) {
                     checkout2(branch.getID(), file);
                     stage.getAddition().put(file, branchTree.get(file));
                 }
+                if (!currTree.get(file).equals(prevTree.get(file))
+                        && !branchTree.get(file).equals(prevTree.get(file))
+                        && !currTree.get(file).equals(branchTree.get(file))) {
+                    conflict++;
+                    writeConflict(file, stage, currTree, branchTree);
+                }
             }
-            if (currTree.containsKey(file)
-                    && !prevTree.containsKey(file)) {
+            if (currTree.containsKey(file) && !branchTree.containsKey(file)) {
                 if (currTree.get(file).equals(prevTree.get(file))) {
                     join(CWD, file).delete();
-                    stage.getAddition().remove(file);
+                    stage.getRemoval().add(file);
+                } else {
+                    conflict++;
+                    writeConflict(file, stage, currTree, branchTree);
                 }
+            }
+            if (branchTree.containsKey(file)
+                    && !currTree.containsKey(file)
+                    && !branchTree.get(file).equals(prevTree.get(file))) {
+                conflict++;
+                writeConflict(file, stage, currTree, branchTree);
             }
         }
         for (String file : branchTree.keySet()) {
-            if (!prevTree.containsKey(file)
-                    && !currTree.containsKey(file)) {
+            if (!prevTree.containsKey(file) && !currTree.containsKey(file)) {
                 checkout2(branch.getID(), file);
                 stage.getAddition().put(file, branchTree.get(file));
             }
+            if (!prevTree.containsKey(file)
+                    && currTree.containsKey(file)
+                    && !currTree.get(file).equals(branchTree.get(file))) {
+                conflict++;
+                writeConflict(file, stage, currTree, branchTree);
+            }
         }
+        writeObject(STAGES, stage);
+        commit("Merged " + branchName + " into " + getHEAD() + " .");
+        if (conflict > 0) {
+            message("Encountered a merge conflict.");
+        }
+    }
 
+    private String getConflict(String curr, String branch) {
+        String msg = "<<<<<<< HEAD\n";
+        msg += curr;
+        msg += "\n";
+        msg += "=======\n";
+        msg += branch;
+        msg += ">>>>>>>";
+        return msg;
+    }
+
+    private void writeConflict(String file, StagingArea stage,
+                               HashMap<String, String> currTree,
+                               HashMap<String, String> branchTree) {
+        String cur = readContentsAsString(join(BLOBS, currTree.get(file)));
+        String bran = readContentsAsString(join(BLOBS, branchTree.get(file)));
+        writeContents(join(CWD, file), getConflict(cur, bran));
+        stage.getAddition().put(file, getConflict(cur, bran));
     }
 
     private Commit getCurrentCommit() {
